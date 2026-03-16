@@ -1,7 +1,7 @@
 import { getStore } from "@netlify/blobs";
-import { buildPrompt } from "./prompts.js";
-import { sanitizeAnswers } from "./sanitize.js";
-import { supabaseInsert } from "./supabase.js";
+import { buildPrompt } from "./lib/prompts.js";
+import { sanitizeAnswers } from "./lib/sanitize.js";
+import { supabaseInsert } from "./lib/supabase.js";
 
 const WINDOW_MS = 15 * 60 * 1000; // 15 minuten
 const MAX_REQUESTS = 10;
