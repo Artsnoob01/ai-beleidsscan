@@ -12,6 +12,7 @@ import { GeneratingScreen } from './components/screens/GeneratingScreen.jsx';
 import { ErrorScreen } from './components/screens/ErrorScreen.jsx';
 import { ReportScreen } from './components/screens/ReportScreen.jsx';
 import { OrderScreen } from './components/screens/OrderScreen.jsx';
+import { OrderQuestionsScreen } from './components/screens/OrderQuestionsScreen.jsx';
 import { OrderConfirmScreen } from './components/screens/OrderConfirmScreen.jsx';
 
 // ═══════════════════════════════════════════════════════════════
@@ -19,7 +20,7 @@ import { OrderConfirmScreen } from './components/screens/OrderConfirmScreen.jsx'
 // ═══════════════════════════════════════════════════════════════
 
 const initialState = {
-  phase: "intro",     // intro | quiz | email | gen | report | error | order | order_confirm
+  phase: "intro",     // intro | quiz | email | gen | report | error | order | order_questions | order_confirm
   sectionIndex: 0,
   answers: {},
   scores: null,
@@ -35,6 +36,7 @@ const initialState = {
   orderError: null,
   orderVariant: null,
   orderEmail: null,
+  orderData: null,
 };
 
 function reducer(state, action) {
@@ -78,6 +80,8 @@ function reducer(state, action) {
       return { ...state, submissionId: action.id };
     case "SHOW_ORDER":
       return { ...state, phase: "order" };
+    case "ORDER_TO_QUESTIONS":
+      return { ...state, phase: "order_questions", orderData: action.orderData, orderError: null };
     case "ORDER_SUBMITTING":
       return { ...state, orderSubmitting: true, orderError: null };
     case "ORDER_SUCCESS":
@@ -229,30 +233,42 @@ export default function App() {
     generateAndSend(lang);
   }, [lang, generateAndSend]);
 
-  const handleOrderSubmit = useCallback(async (orderData) => {
+  const handleOrderNext = useCallback((orderData) => {
+    dispatch({ type: "ORDER_TO_QUESTIONS", orderData });
+  }, []);
+
+  const handleOrderQuestionsSubmit = useCallback(async (policyDetails) => {
     dispatch({ type: "ORDER_SUBMITTING" });
     try {
       const resp = await fetch("/api/process-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(orderData),
+        body: JSON.stringify({ ...state.orderData, policyDetails }),
       });
       if (!resp.ok) {
         const errData = await resp.json().catch(() => ({}));
         throw new Error(errData.error || "Bestelling mislukt");
       }
-      dispatch({ type: "ORDER_SUCCESS", variant: orderData.variant, email: orderData.email });
+      dispatch({ type: "ORDER_SUCCESS", variant: state.orderData.variant, email: state.orderData.email });
     } catch (e) {
       dispatch({ type: "ORDER_ERROR", error: e.message });
     }
-  }, []);
+  }, [state.orderData]);
 
   // ─── RENDER ───
 
   if (phase === "order") return (
     <OrderScreen
       submissionId={orderSubmissionId.current || submissionId}
-      onSubmit={handleOrderSubmit}
+      onSubmit={handleOrderNext}
+      submitting={false}
+      error={orderError}
+    />
+  );
+
+  if (phase === "order_questions") return (
+    <OrderQuestionsScreen
+      onSubmit={handleOrderQuestionsSubmit}
       submitting={orderSubmitting}
       error={orderError}
     />

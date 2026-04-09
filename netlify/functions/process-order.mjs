@@ -8,7 +8,7 @@ export default async function handler(req) {
   }
 
   try {
-    const { name, firm, email, address, postcode, city, variant, submissionId } = await req.json();
+    const { name, firm, email, address, postcode, city, variant, submissionId, policyDetails } = await req.json();
 
     // Validation
     if (!name || !firm || !email || !address || !postcode || !city || !variant || !submissionId) {
@@ -96,7 +96,7 @@ export default async function handler(req) {
     // 4. For standard variant: generate and send policy immediately
     if (variant === "standard" && answers && scores) {
       try {
-        await generateAndSendPolicy({ answers, scores, lang, email, name, firm, submissionId, supabaseUrl, supabaseKey, resendKey, fromAddress });
+        await generateAndSendPolicy({ answers, scores, lang, email, name, firm, submissionId, supabaseUrl, supabaseKey, resendKey, fromAddress, policyDetails });
       } catch (e) {
         console.error("Policy generation failed:", e);
         // Still return success to client - they'll get a notification
@@ -106,7 +106,7 @@ export default async function handler(req) {
     // 5. For premium variant: generate and send to team for review
     if (variant === "premium" && answers && scores) {
       try {
-        await generateAndSendPolicy({ answers, scores, lang, email: "info@theinnovativelawyer.ai", name, firm, submissionId, supabaseUrl, supabaseKey, resendKey, fromAddress, isReview: true, clientEmail: email });
+        await generateAndSendPolicy({ answers, scores, lang, email: "info@theinnovativelawyer.ai", name, firm, submissionId, supabaseUrl, supabaseKey, resendKey, fromAddress, isReview: true, clientEmail: email, policyDetails });
       } catch (e) {
         console.error("Policy generation for review failed:", e);
       }
@@ -123,11 +123,11 @@ export default async function handler(req) {
 }
 
 // Generate policy document with Claude and send as PDF
-async function generateAndSendPolicy({ answers, scores, lang, email, name, firm, submissionId, supabaseUrl, supabaseKey, resendKey, fromAddress, isReview, clientEmail }) {
+async function generateAndSendPolicy({ answers, scores, lang, email, name, firm, submissionId, supabaseUrl, supabaseKey, resendKey, fromAddress, isReview, clientEmail, policyDetails }) {
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
   if (!anthropicKey) throw new Error("ANTHROPIC_API_KEY not configured");
 
-  const prompt = buildPolicyPrompt(answers, scores, lang, name, firm);
+  const prompt = buildPolicyPrompt(answers, scores, lang, name, firm, policyDetails);
 
   // Call Claude API (non-streaming for serverless)
   const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -211,13 +211,29 @@ async function generateAndSendPolicy({ answers, scores, lang, email, name, firm,
 }
 
 // Placeholder policy prompt - replace with final version when ready
-function buildPolicyPrompt(answers, scores, lang, name, firm) {
-  const ctx = `Organisatie: ${firm}
+function buildPolicyPrompt(answers, scores, lang, name, firm, policyDetails) {
+  const pd = policyDetails || {};
+  const officialName = pd.officialName || firm;
+  const reviewLabel = { quarterly: "elk kwartaal", biannual: "halfjaarlijks", annual: "jaarlijks" }[pd.reviewFrequency] || "jaarlijks";
+  const dataClassLabel = {
+    standard: "openbaar / intern / vertrouwelijk / strikt vertrouwelijk",
+    simple: "openbaar / vertrouwelijk",
+    custom: pd.remarks ? "eigen indeling (zie opmerkingen)" : "openbaar / intern / vertrouwelijk / strikt vertrouwelijk",
+  }[pd.dataClassification] || "openbaar / intern / vertrouwelijk / strikt vertrouwelijk";
+
+  const ctx = `Organisatie: ${officialName}
 Contactpersoon: ${name}
+AI-verantwoordelijke: ${pd.aiResponsible || "nader te bepalen"}${pd.aiResponsibleRole ? ` (${pd.aiResponsibleRole})` : ""}
+Goedgekeurde AI-tools: ${pd.approvedTools || "Zie scanantwoorden"}
+Niet-toegestane AI-tools: ${pd.forbiddenTools || "Niet gespecificeerd"}
+Dataclassificatie: ${dataClassLabel}
+Herzieningsfrequentie beleid: ${reviewLabel}
+Bestaande beleidsregels: ${pd.existingPolicies || "Geen opgegeven"}
+Overige wensen: ${pd.remarks || "Geen"}
 Antwoorden uit de AI-beleidsscan: ${JSON.stringify(answers)}
 Scores: NOvA ${scores.orde}/100, AVG ${scores.avg}/100, AI Act ${scores.aiact}/100, Overall ${scores.overall}/100.`;
 
-  return `Je bent een AI-compliance specialist voor de Nederlandse advocatuur. Op basis van onderstaande scanresultaten schrijf je een compleet, kant-en-klaar AI-beleidsdocument voor ${firm}.
+  return `Je bent een AI-compliance specialist voor de Nederlandse advocatuur. Op basis van onderstaande scanresultaten en aanvullende gegevens schrijf je een compleet, kant-en-klaar AI-beleidsdocument voor ${officialName}.
 
 ${ctx}
 
