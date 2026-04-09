@@ -75,13 +75,13 @@ export default async function handler(req) {
     <div class="content">
       <p>Beste lezer,</p>
       <p>Bedankt voor het invullen van de AI-beleidsscan van The Innovative Lawyer.</p>
-      <p>Op basis van uw antwoorden hebben wij uw AI-beleid getoetst aan drie belangrijke pijlers:</p>
+      <p>Op basis van uw antwoorden hebben het AI-gebruik binnen uw organisatie getoetst aan drie belangrijke pijlers:</p>
       <p>
-        <strong>NOvA-kernwaarden</strong>: Hoe verhoudt uw AI-gebruik zich tot de kernwaarden van de advocatuur?<br/>
-        <strong>AVG-compliance</strong>: Voldoet uw AI-gebruik aan de privacywetgeving?<br/>
-        <strong>EU AI Act</strong>: Bent u voorbereid op de nieuwe Europese AI-regelgeving?
+        <strong>NOvA</strong>: Hoe verhoudt uw AI-gebruik zich tot de kernwaarden en de Aanbevelingen AI in de advocatuur?<br/>
+        <strong>AVG</strong>: Voldoet uw AI-gebruik aan privacyregelgeving?<br/>
+        <strong>AI Act</strong>: Handelt u conform de nieuwe Europese AI-regelgeving?
       </p>
-      <p>In de bijlage vindt u uw persoonlijke rapport met een uitgebreide analyse per onderdeel en concrete aanbevelingen om uw AI-beleid te versterken.</p>
+      <p>In de bijlage vindt u uw persoonlijke rapport met een uitgebreide analyse per onderdeel en concrete aanbevelingen om uw AI-beleid vorm te geven of te versterken.</p>
       <p>AI-regelgeving ontwikkelt zich snel. Een goed AI-beleid beschermt niet alleen uw kantoor, maar geeft ook vertrouwen aan uw cliënten en medewerkers.</p>
     </div>
     <div class="cta">
