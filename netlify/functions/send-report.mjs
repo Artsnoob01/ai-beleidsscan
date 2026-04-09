@@ -47,8 +47,6 @@ export default async function handler(req) {
       ? "Your AI Policy Scan - The Innovative Lawyer"
       : "Uw AI-beleidsscan - The Innovative Lawyer";
 
-    const scoreColor = (s) => s >= 75 ? "#10b981" : s >= 45 ? "#f59e0b" : "#ef4444";
-
     const htmlBody = `
 <!DOCTYPE html>
 <html>
@@ -59,11 +57,6 @@ export default async function handler(req) {
     body { margin: 0; padding: 0; background: #f4f4f7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     .container { max-width: 640px; margin: 0 auto; background: #ffffff; }
     .header { background: #050a12; padding: 32px 40px; text-align: center; }
-    .scores { background: #050a12; padding: 0 40px 32px; text-align: center; }
-    .score-grid { display: inline-flex; gap: 24px; margin-top: 16px; }
-    .score-item { text-align: center; }
-    .score-num { font-size: 28px; font-weight: 800; }
-    .score-label { font-size: 11px; color: #8b9dc3; margin-top: 4px; }
     .content { padding: 36px 40px; }
     .content p { font-size: 14px; line-height: 1.75; color: #374151; margin: 10px 0; }
     .content strong { color: #1a1a2e; }
@@ -78,22 +71,6 @@ export default async function handler(req) {
   <div class="container">
     <div class="header">
       <img src="${LOGO_URL}" alt="The Innovative Lawyer" style="height: 40px; width: auto;" onerror="this.style.display='none'" />
-    </div>
-    <div class="scores">
-      <div class="score-grid">
-        <div class="score-item">
-          <div class="score-num" style="color: ${scoreColor(scores.orde)}">${scores.orde}</div>
-          <div class="score-label">NOvA</div>
-        </div>
-        <div class="score-item">
-          <div class="score-num" style="color: ${scoreColor(scores.avg)}">${scores.avg}</div>
-          <div class="score-label">AVG / GDPR</div>
-        </div>
-        <div class="score-item">
-          <div class="score-num" style="color: ${scoreColor(scores.aiact)}">${scores.aiact}</div>
-          <div class="score-label">EU AI Act</div>
-        </div>
-      </div>
     </div>
     <div class="content">
       <p>Beste lezer,</p>
