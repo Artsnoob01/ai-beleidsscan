@@ -5,8 +5,8 @@ export const ScoreRing = ({ score, size = 120, label, sub, lang = 'nl' }) => {
   const lv = getLevel(score, lang), r = (size - 12) / 2, circ = 2 * Math.PI * r;
   return (
     <div style={{ textAlign: "center" }}>
-      <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }} role="img" aria-label={`${label || 'Score'}: ${score} — ${lv.label}`}>
-        <title>{`${label || 'Score'}: ${score} — ${lv.label}`}</title>
+      <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }} role="img" aria-label={`${label || 'Score'}: ${score}, ${lv.label}`}>
+        <title>{`${label || 'Score'}: ${score}, ${lv.label}`}</title>
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={C.border} strokeWidth={5} />
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={lv.color} strokeWidth={5}
           strokeDasharray={circ} strokeDashoffset={circ - (score / 100) * circ} strokeLinecap="round"

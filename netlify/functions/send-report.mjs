@@ -44,8 +44,8 @@ export default async function handler(req) {
     // Build email
     const fromAddress = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
     const subject = lang === "en"
-      ? "Your AI Policy Scan — The Innovative Lawyer"
-      : "Uw AI-beleidsscan — The Innovative Lawyer";
+      ? "Your AI Policy Scan - The Innovative Lawyer"
+      : "Uw AI-beleidsscan - The Innovative Lawyer";
 
     const scoreColor = (s) => s >= 75 ? "#10b981" : s >= 45 ? "#f59e0b" : "#ef4444";
 
@@ -100,9 +100,9 @@ export default async function handler(req) {
       <p>Bedankt voor het invullen van de AI-beleidsscan van The Innovative Lawyer.</p>
       <p>Op basis van uw antwoorden hebben wij uw AI-beleid getoetst aan drie belangrijke pijlers:</p>
       <p>
-        <strong>NOvA-kernwaarden</strong> — Hoe verhoudt uw AI-gebruik zich tot de kernwaarden van de advocatuur?<br/>
-        <strong>AVG-compliance</strong> — Voldoet uw AI-gebruik aan de privacywetgeving?<br/>
-        <strong>EU AI Act</strong> — Bent u voorbereid op de nieuwe Europese AI-regelgeving?
+        <strong>NOvA-kernwaarden</strong>: Hoe verhoudt uw AI-gebruik zich tot de kernwaarden van de advocatuur?<br/>
+        <strong>AVG-compliance</strong>: Voldoet uw AI-gebruik aan de privacywetgeving?<br/>
+        <strong>EU AI Act</strong>: Bent u voorbereid op de nieuwe Europese AI-regelgeving?
       </p>
       <p>In de bijlage vindt u uw persoonlijke rapport met een uitgebreide analyse per onderdeel en concrete aanbevelingen om uw AI-beleid te versterken.</p>
       <p>AI-regelgeving ontwikkelt zich snel. Een goed AI-beleid beschermt niet alleen uw kantoor, maar geeft ook vertrouwen aan uw cliënten en medewerkers.</p>
@@ -399,7 +399,7 @@ async function generatePDF(report, scores, lang) {
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...textGray);
-  doc.text(`\u00A9 ${new Date().getFullYear()} The Innovative Lawyer \u2014 theinnovativelawyer.ai`, pageW / 2, y, { align: "center" });
+  doc.text(`\u00A9 ${new Date().getFullYear()} The Innovative Lawyer - theinnovativelawyer.ai`, pageW / 2, y, { align: "center" });
   y += 4;
   doc.text("Dit rapport is automatisch gegenereerd op basis van uw antwoorden.", pageW / 2, y, { align: "center" });
 

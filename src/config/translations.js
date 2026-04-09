@@ -3,7 +3,7 @@ const translations = {
     // IntroScreen
     intro_badge: "AI Compliance Quick Scan",
     intro_title: "AI-beleidsscan voor advocatenkantoren",
-    intro_subtitle: "Breng in kaart hoe uw kantoor scoort op AI-compliance \u2014 getoetst aan de NOvA-kernwaarden, de AVG en de EU AI Act. Ontvang direct een gepersonaliseerd adviesrapport.",
+    intro_subtitle: "Breng in kaart hoe uw kantoor scoort op AI-compliance, getoetst aan de NOvA-kernwaarden, de AVG en de EU AI Act. Ontvang direct een gepersonaliseerd rapport.",
     intro_start: "Start de scan \u2192",
     intro_meta_prefix: "\u00B1 5 minuten \u00B7 ",
     intro_meta_suffix: " vragen \u00B7 Gratis",
@@ -23,7 +23,7 @@ const translations = {
 
     // EmailScreen
     email_ready: "Uw rapport is klaar",
-    email_desc: "Vul uw e-mailadres in om het volledige, gepersonaliseerde compliance-rapport te ontvangen \u2014 getoetst aan NOvA, AVG en AI Act.",
+    email_desc: "Vul uw e-mailadres in om het volledige, gepersonaliseerde compliance-rapport te ontvangen, getoetst aan NOvA, AVG en AI Act.",
     email_placeholder: "uw@email.nl",
     email_submit: "Verstuur mijn rapport \u2192",
     email_privacy: "Wij respecteren uw privacy. Uw e-mailadres wordt alleen gebruikt om het rapport te versturen.",
@@ -40,7 +40,7 @@ const translations = {
 
     // ReportScreen
     report_badge: "Compliance Rapport",
-    report_title: "AI-beleidsscan \u2014 Resultaten",
+    report_title: "AI-beleidsscan Resultaten",
     report_new_scan: "\u21A9 Nieuwe scan",
     report_summary: "Samenvatting",
     report_sending: "Rapport wordt verzonden...",
@@ -52,7 +52,7 @@ const translations = {
     report_email_retry: "Opnieuw verzenden \u2192",
     report_email_note: "Uw rapport is gereed. Alleen het verzenden per e-mail is mislukt.",
     report_cta_title: "Van scan naar werkend AI-beleid?",
-    report_cta_desc: "Ontvang een compleet AI-beleidsdocument op maat \u2014 kant-en-klaar voor uw kantoor, gebaseerd op uw antwoorden en getoetst aan NOvA, AVG en AI Act.",
+    report_cta_desc: "Ontvang een compleet AI-beleid op maat, kant-en-klaar voor uw kantoor, gebaseerd op uw antwoorden en getoetst aan NOvA, AVG en AI Act.",
     report_cta_button: "Plan een kennismaking \u2192",
 
     // ErrorBoundary
