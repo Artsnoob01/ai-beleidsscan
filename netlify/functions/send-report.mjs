@@ -81,13 +81,11 @@ export default async function handler(req) {
       </p>
       <p>In de bijlage vindt u uw persoonlijke rapport met een uitgebreide analyse per onderdeel en concrete aanbevelingen om uw AI-beleid vorm te geven of te versterken.</p>
       <p>AI-regelgeving ontwikkelt zich snel. Een goed AI-beleid beschermt niet alleen uw kantoor, maar geeft ook vertrouwen aan uw cliënten en medewerkers.</p>
+      <p style="margin-top: 24px;">Met vriendelijke groet,<br/><strong>Joyce Boonstra</strong><br/>The Innovative Lawyer<br/>theinnovativelawyer.ai</p>
     </div>
     <div class="cta">
       <p>Wilt u weten hoe u de verbeterpunten uit uw rapport direct kunt aanpakken?</p>
       <a href="mailto:info@theinnovativelawyer.ai?subject=Kennismaking%20AI-beleidsscan">Plan een kennismaking &rarr;</a>
-    </div>
-    <div class="content" style="padding-top: 0;">
-      <p>Met vriendelijke groet,<br/><strong>Joyce Boonstra</strong><br/>The Innovative Lawyer<br/>theinnovativelawyer.ai</p>
     </div>
   </div>
 </body>
