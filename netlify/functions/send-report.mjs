@@ -63,8 +63,6 @@ export default async function handler(req) {
     .cta { background: #f0fdf8; border: 1px solid rgba(0,212,138,0.25); border-radius: 12px; padding: 28px; text-align: center; margin: 32px 40px; }
     .cta p { font-size: 14px; color: #374151; line-height: 1.6; margin-bottom: 16px; }
     .cta a { display: inline-block; padding: 12px 28px; background: #00d48a; color: #000; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 13px; }
-    .footer { padding: 24px 40px; text-align: center; background: #f9fafb; border-top: 1px solid #e5e7eb; }
-    .footer p { font-size: 11px; color: #9ca3af; line-height: 1.5; }
   </style>
 </head>
 <body>
@@ -88,9 +86,8 @@ export default async function handler(req) {
       <p>Wilt u weten hoe u de verbeterpunten uit uw rapport direct kunt aanpakken?</p>
       <a href="mailto:info@theinnovativelawyer.ai?subject=Kennismaking%20AI-beleidsscan">Plan een kennismaking &rarr;</a>
     </div>
-    <div class="footer">
+    <div class="content" style="padding-top: 0;">
       <p>Met vriendelijke groet,<br/><strong>Joyce Boonstra</strong><br/>The Innovative Lawyer<br/>theinnovativelawyer.ai</p>
-      <p style="margin-top: 12px;">&copy; ${new Date().getFullYear()} The Innovative Lawyer</p>
     </div>
   </div>
 </body>
