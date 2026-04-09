@@ -27,22 +27,22 @@ export function OrderConfirmScreen({ variant, email }) {
           {isStandard ? (
             <>
               <p style={{ fontSize: 14, color: C.textMuted, lineHeight: 1.7, marginBottom: 16 }}>
-                Uw AI-beleidsdocument wordt nu gegenereerd en binnen enkele minuten per e-mail verstuurd naar:
+                Uw AI-beleid wordt nu gegenereerd en binnen enkele minuten per e-mail verstuurd naar:
               </p>
               <p style={{ fontSize: 15, fontWeight: 700, color: C.accent, marginBottom: 16 }}>{email}</p>
               <p style={{ fontSize: 12, color: C.textDim, lineHeight: 1.6 }}>
-                Dit document is automatisch gegenereerd op basis van uw scanresultaten. Wij adviseren u het document te controleren en waar nodig aan te passen aan de specifieke situatie van uw organisatie voordat u het vaststelt als beleid.
+                Dit document is automatisch gegenereerd op basis van uw scanresultaten. Controleer het document en pas het waar nodig aan voordat u het vaststelt als beleid.
               </p>
             </>
           ) : (
             <>
               <p style={{ fontSize: 14, color: C.textMuted, lineHeight: 1.7, marginBottom: 16 }}>
-                Uw AI-beleidsdocument wordt opgesteld en door onze specialisten gecontroleerd en aangevuld. U ontvangt het document per e-mail op:
+                Bedankt voor uw bestelling. Wij nemen binnen 2 werkdagen contact met u op om een gesprek in te plannen waarin we uw AI-beleid bespreken.
+              </p>
+              <p style={{ fontSize: 14, color: C.textMuted, lineHeight: 1.7, marginBottom: 16 }}>
+                Na de bespreking ontvangt u het definitieve document per e-mail op:
               </p>
               <p style={{ fontSize: 15, fontWeight: 700, color: C.accent, marginBottom: 16 }}>{email}</p>
-              <p style={{ fontSize: 12, color: C.textDim, lineHeight: 1.6 }}>
-                Wij nemen binnen 2 werkdagen contact met u op voor eventuele aanvullende vragen.
-              </p>
             </>
           )}
         </div>

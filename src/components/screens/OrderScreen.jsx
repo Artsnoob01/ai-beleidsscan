@@ -4,8 +4,8 @@ import { Logo } from '../Logo.jsx';
 import { btn, font } from '../../styles/buttonStyles.js';
 
 const VARIANTS = [
-  { id: "standard", name: "Standaard", price: "499", desc: "Kant-en-klaar AI-beleidsdocument, direct per e-mail geleverd." },
-  { id: "premium", name: "Premium", price: "999", desc: "AI-beleidsdocument met handmatige review en aanvullingen door onze specialisten." },
+  { id: "standard", name: "Standaard", price: "499", desc: "AI-beleid op basis van uw scanresultaten, direct per e-mail geleverd. Door u zelf te controleren en vast te stellen." },
+  { id: "premium", name: "Premium", price: "1.999", desc: "AI-beleid inclusief een bespreking met een specialist. Wij nemen contact met u op om een gesprek in te plannen." },
 ];
 
 const inputStyle = {
@@ -102,8 +102,9 @@ export function OrderScreen({ submissionId, onSubmit, submitting, error }) {
 
           {/* Disclaimer */}
           <p style={{ fontSize: 11, color: C.textDim, lineHeight: 1.6, marginTop: 20 }}>
-            U ontvangt een factuur op het opgegeven adres. Het AI-beleidsdocument wordt direct na bestelling gegenereerd en per e-mail geleverd.
-            {variant === "standard" && " Het document is automatisch gegenereerd en dient door uw organisatie te worden gecontroleerd voordat het wordt vastgesteld."}
+            U ontvangt een factuur op het opgegeven adres.
+            {variant === "standard" && " Uw AI-beleid wordt direct na bestelling gegenereerd en per e-mail geleverd. Het document dient door u te worden gecontroleerd voordat u het vaststelt."}
+            {variant === "premium" && " Wij nemen binnen 2 werkdagen contact met u op om een bespreking in te plannen."}
           </p>
 
           {error && (
@@ -125,6 +126,10 @@ export function OrderScreen({ submissionId, onSubmit, submitting, error }) {
           >
             {submitting ? "Bestelling verwerken..." : `Bestellen - \u20AC${VARIANTS.find(v => v.id === variant).price}`}
           </button>
+
+          <p style={{ fontSize: 11, color: C.textDim, textAlign: "center", marginTop: 12 }}>
+            Alle bedragen zijn exclusief btw.
+          </p>
         </div>
       </div>
     </div>
