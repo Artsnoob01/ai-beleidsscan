@@ -43,7 +43,6 @@ export function EmailScreen({ email, scores, dispatch, handleEmailSubmit, lang }
             value={email}
             onChange={e => dispatch({ type: "SET_EMAIL", email: e.target.value })}
             onKeyDown={e => e.key === "Enter" && validEmail && handleEmailSubmit()}
-            aria-describedby="email-privacy"
             style={{
               width: "100%", padding: "14px 18px", fontSize: 15, background: C.bgInput, color: C.white,
               border: `1.5px solid ${email && !validEmail ? C.dangerBorder : C.accentBorder}`,
@@ -65,9 +64,6 @@ export function EmailScreen({ email, scores, dispatch, handleEmailSubmit, lang }
           >
             {t(lang, 'email_submit')}
           </button>
-          <p id="email-privacy" style={{ fontSize: 11, color: C.textDim, marginTop: 14, lineHeight: 1.5 }}>
-            {t(lang, 'email_privacy')}
-          </p>
         </div>
       </div>
     </div>

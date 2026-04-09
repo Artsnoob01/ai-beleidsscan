@@ -1,4 +1,7 @@
-// Sends the generated report via email using Resend
+// Sends the generated report as PDF attachment via email using Resend
+import { jsPDF } from "jspdf";
+
+const LOGO_URL = "https://images.squarespace-cdn.com/content/v1/669fae01753c7f1a79db39a6/d848d469-55de-4474-b68f-a482cfa12722/Anti-Flash+White+and+Green+2200x400+(presentation).png?format=1500w";
 
 export default async function handler(req) {
   if (req.method !== "POST") {
@@ -35,13 +38,16 @@ export default async function handler(req) {
       );
     }
 
-    // Convert markdown report to HTML for email
-    const reportHtml = markdownToHtml(report);
+    // Generate PDF
+    const pdfBase64 = await generatePDF(report, scores, lang);
 
+    // Build email
     const fromAddress = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
+    const subject = lang === "en"
+      ? "Your AI Policy Scan — The Innovative Lawyer"
+      : "Uw AI-beleidsscan — The Innovative Lawyer";
 
     const scoreColor = (s) => s >= 75 ? "#10b981" : s >= 45 ? "#f59e0b" : "#ef4444";
-    const scoreLabel = (s) => s >= 75 ? "Goed" : s >= 45 ? "Matig" : "Onvoldoende";
 
     const htmlBody = `
 <!DOCTYPE html>
@@ -53,28 +59,16 @@ export default async function handler(req) {
     body { margin: 0; padding: 0; background: #f4f4f7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     .container { max-width: 640px; margin: 0 auto; background: #ffffff; }
     .header { background: #050a12; padding: 32px 40px; text-align: center; }
-    .header img { height: 40px; width: auto; }
-    .badge { display: inline-block; padding: 4px 14px; border-radius: 16px; background: rgba(0,212,138,0.12); border: 1px solid rgba(0,212,138,0.25); margin-bottom: 16px; }
-    .badge span { font-size: 10px; font-weight: 700; color: #00d48a; letter-spacing: 1.5px; text-transform: uppercase; }
-    .scores { background: #050a12; padding: 24px 40px 32px; text-align: center; }
+    .scores { background: #050a12; padding: 0 40px 32px; text-align: center; }
     .score-grid { display: inline-flex; gap: 24px; margin-top: 16px; }
     .score-item { text-align: center; }
-    .score-num { font-size: 32px; font-weight: 800; }
+    .score-num { font-size: 28px; font-weight: 800; }
     .score-label { font-size: 11px; color: #8b9dc3; margin-top: 4px; }
     .content { padding: 36px 40px; }
-    .content h2 { font-size: 18px; font-weight: 800; color: #00d48a; margin-top: 28px; margin-bottom: 10px; border-bottom: 2px solid #e8e8e8; padding-bottom: 6px; }
-    .content h3 { font-size: 15px; font-weight: 700; color: #1a1a2e; margin-top: 20px; margin-bottom: 8px; }
-    .content p { font-size: 14px; line-height: 1.75; color: #374151; margin: 6px 0; }
-    .content ol { padding-left: 20px; margin: 10px 0; }
-    .content li { font-size: 14px; line-height: 1.75; color: #374151; margin-bottom: 8px; }
-    .content ul { padding-left: 20px; margin: 10px 0; }
-    .content ul li { list-style-type: disc; }
-    .content a { color: #00d48a; text-decoration: underline; }
+    .content p { font-size: 14px; line-height: 1.75; color: #374151; margin: 10px 0; }
     .content strong { color: #1a1a2e; }
-    .content em { color: #6b7280; }
     .cta { background: #f0fdf8; border: 1px solid rgba(0,212,138,0.25); border-radius: 12px; padding: 28px; text-align: center; margin: 32px 40px; }
-    .cta h3 { font-size: 16px; font-weight: 700; color: #1a1a2e; margin-bottom: 8px; }
-    .cta p { font-size: 13px; color: #6b7280; line-height: 1.6; margin-bottom: 16px; }
+    .cta p { font-size: 14px; color: #374151; line-height: 1.6; margin-bottom: 16px; }
     .cta a { display: inline-block; padding: 12px 28px; background: #00d48a; color: #000; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 13px; }
     .footer { padding: 24px 40px; text-align: center; background: #f9fafb; border-top: 1px solid #e5e7eb; }
     .footer p { font-size: 11px; color: #9ca3af; line-height: 1.5; }
@@ -83,14 +77,9 @@ export default async function handler(req) {
 <body>
   <div class="container">
     <div class="header">
-      <img src="https://theinnovativelawyer.ai/logo.webp" alt="The Innovative Lawyer" style="height: 40px;" onerror="this.style.display='none'" />
+      <img src="${LOGO_URL}" alt="The Innovative Lawyer" style="height: 40px; width: auto;" onerror="this.style.display='none'" />
     </div>
     <div class="scores">
-      <div class="badge"><span>AI Compliance Rapport</span></div>
-      <div>
-        <div style="font-size: 48px; font-weight: 800; color: ${scoreColor(scores.overall)}">${scores.overall}</div>
-        <div style="font-size: 13px; font-weight: 600; color: ${scoreColor(scores.overall)}">${scoreLabel(scores.overall)}</div>
-      </div>
       <div class="score-grid">
         <div class="score-item">
           <div class="score-num" style="color: ${scoreColor(scores.orde)}">${scores.orde}</div>
@@ -107,29 +96,28 @@ export default async function handler(req) {
       </div>
     </div>
     <div class="content">
-      <p style="font-size: 13px; color: #6b7280; line-height: 1.7; padding: 14px 18px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 24px;">
-        Dit rapport is opgesteld op basis van uw antwoorden, getoetst aan drie kaders: de
-        <a href="https://www.advocatenorde.nl/document/nova-aanbevelingen-ai-in-de-advocatuur-2025">NOvA-aanbevelingen</a> (november 2025), het AP-beleidsdocument
-        <a href="https://autoriteitpersoonsgegevens.nl/system/files?file=2026-02/verantwoord-vooruit-ap-visie-op-generatieve-ai.pdf">Verantwoord Vooruit</a> (februari 2026) en de
-        <a href="https://artificialintelligenceact.eu/article/4/">EU AI Act</a>.
+      <p>Beste lezer,</p>
+      <p>Bedankt voor het invullen van de AI-beleidsscan van The Innovative Lawyer.</p>
+      <p>Op basis van uw antwoorden hebben wij uw AI-beleid getoetst aan drie belangrijke pijlers:</p>
+      <p>
+        <strong>NOvA-kernwaarden</strong> — Hoe verhoudt uw AI-gebruik zich tot de kernwaarden van de advocatuur?<br/>
+        <strong>AVG-compliance</strong> — Voldoet uw AI-gebruik aan de privacywetgeving?<br/>
+        <strong>EU AI Act</strong> — Bent u voorbereid op de nieuwe Europese AI-regelgeving?
       </p>
-      ${reportHtml}
+      <p>In de bijlage vindt u uw persoonlijke rapport met een uitgebreide analyse per onderdeel en concrete aanbevelingen om uw AI-beleid te versterken.</p>
+      <p>AI-regelgeving ontwikkelt zich snel. Een goed AI-beleid beschermt niet alleen uw kantoor, maar geeft ook vertrouwen aan uw cliënten en medewerkers.</p>
     </div>
     <div class="cta">
-      <h3>Van scan naar werkend AI-beleid?</h3>
-      <p>Ontvang een compleet AI-beleidsdocument op maat — kant-en-klaar voor uw kantoor, gebaseerd op uw antwoorden en getoetst aan NOvA, AVG en AI Act.</p>
-      <a href="mailto:info@theinnovativelawyer.ai?subject=AI-beleidsscan%20opvolging">Plan een kennismaking →</a>
+      <p>Wilt u weten hoe u de verbeterpunten uit uw rapport direct kunt aanpakken?</p>
+      <a href="mailto:info@theinnovativelawyer.ai?subject=Kennismaking%20AI-beleidsscan">Plan een kennismaking &rarr;</a>
     </div>
     <div class="footer">
-      <p>© ${new Date().getFullYear()} The Innovative Lawyer · Dit rapport is automatisch gegenereerd op basis van uw antwoorden.</p>
+      <p>Met vriendelijke groet,<br/><strong>Joyce Boonstra</strong><br/>The Innovative Lawyer<br/>theinnovativelawyer.ai</p>
+      <p style="margin-top: 12px;">&copy; ${new Date().getFullYear()} The Innovative Lawyer</p>
     </div>
   </div>
 </body>
 </html>`;
-
-    const subject = lang === "en"
-      ? "Your AI Compliance Report — The Innovative Lawyer"
-      : "Uw AI-compliance rapport — The Innovative Lawyer";
 
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -142,6 +130,12 @@ export default async function handler(req) {
         to: [email],
         subject,
         html: htmlBody,
+        attachments: [
+          {
+            filename: "AI-beleidsscan-rapport.pdf",
+            content: pdfBase64,
+          },
+        ],
       }),
     });
 
@@ -165,14 +159,12 @@ export default async function handler(req) {
           "Authorization": `Bearer ${supabaseKey}`,
         };
         if (submissionId) {
-          // Update existing row with email + report
           await fetch(`${supabaseUrl}/rest/v1/submissions?id=eq.${submissionId}`, {
             method: "PATCH",
             headers: { ...sbHeaders, "Prefer": "return=minimal" },
             body: JSON.stringify({ email, report }),
           });
         } else {
-          // No submissionId — insert a new row
           await fetch(`${supabaseUrl}/rest/v1/submissions`, {
             method: "POST",
             headers: { ...sbHeaders, "Prefer": "return=minimal" },
@@ -196,62 +188,235 @@ export default async function handler(req) {
   }
 }
 
-// Simple markdown to HTML converter for the email
-function markdownToHtml(md) {
-  if (!md) return "";
-  let html = "";
-  const lines = md.split("\n");
+// --- PDF Generation ---
+
+async function fetchLogoBase64() {
+  try {
+    const res = await fetch(LOGO_URL);
+    if (!res.ok) return null;
+    const buf = await res.arrayBuffer();
+    const base64 = Buffer.from(buf).toString("base64");
+    return "data:image/png;base64," + base64;
+  } catch {
+    return null;
+  }
+}
+
+async function generatePDF(report, scores, lang) {
+  const doc = new jsPDF({ unit: "mm", format: "a4" });
+  const pageW = 210;
+  const pageH = 297;
+  const marginL = 20;
+  const marginR = 20;
+  const contentW = pageW - marginL - marginR;
+  const bottomMargin = 25;
+  let y = 0;
+
+  // Colors
+  const green = [0, 212, 138];
+  const darkBg = [5, 10, 18];
+  const textDark = [30, 30, 46];
+  const textGray = [107, 114, 128];
+
+  // --- Header with dark background ---
+  doc.setFillColor(...darkBg);
+  doc.rect(0, 0, pageW, 52, "F");
+
+  // Logo
+  const logoData = await fetchLogoBase64();
+  if (logoData) {
+    try {
+      // Logo is wide (2200x400 ratio = 5.5:1), scale to fit
+      const logoH = 10;
+      const logoW = logoH * 5.5;
+      const logoX = (pageW - logoW) / 2;
+      doc.addImage(logoData, "PNG", logoX, 8, logoW, logoH);
+    } catch {
+      // Skip logo on error
+    }
+  }
+
+  // Scores in header
+  const scoreColor = (s) => s >= 75 ? [16, 185, 129] : s >= 45 ? [245, 158, 11] : [239, 68, 68];
+  const scoreItems = [
+    { label: "NOvA", value: scores.orde },
+    { label: "AVG / GDPR", value: scores.avg },
+    { label: "EU AI Act", value: scores.aiact },
+  ];
+
+  const scoreStartX = pageW / 2 - 45;
+  scoreItems.forEach((item, i) => {
+    const x = scoreStartX + i * 30 + 15;
+    doc.setFontSize(22);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...scoreColor(item.value));
+    doc.text(String(item.value), x, 32, { align: "center" });
+    doc.setFontSize(8);
+    doc.setTextColor(139, 157, 195);
+    doc.setFont("helvetica", "normal");
+    doc.text(item.label, x, 38, { align: "center" });
+  });
+
+  // Overall score
+  doc.setFontSize(9);
+  doc.setTextColor(...green);
+  doc.setFont("helvetica", "bold");
+  doc.text(`Overall: ${scores.overall}/100`, pageW / 2, 47, { align: "center" });
+
+  y = 60;
+
+  // --- Parse and render markdown ---
+  const lines = report.split("\n");
   let i = 0;
+
+  function checkPageBreak(needed) {
+    if (y + needed > pageH - bottomMargin) {
+      doc.addPage();
+      y = 20;
+    }
+  }
+
+  function renderWrappedText(text, fontSize, fontStyle, color, indent) {
+    indent = indent || 0;
+    doc.setFontSize(fontSize);
+    doc.setFont("helvetica", fontStyle);
+    doc.setTextColor(...color);
+    const maxW = contentW - indent;
+    const wrapped = doc.splitTextToSize(cleanMarkdown(text), maxW);
+    wrapped.forEach((line) => {
+      checkPageBreak(fontSize * 0.4 + 1);
+      doc.text(line, marginL + indent, y);
+      y += fontSize * 0.45;
+    });
+    y += 1;
+  }
 
   while (i < lines.length) {
     const line = lines[i];
 
+    // H2 heading
     if (line.startsWith("## ")) {
-      html += `<h2>${escHtml(line.slice(3))}</h2>`;
-      i++; continue;
+      y += 4;
+      checkPageBreak(14);
+      const headingText = line.slice(3).trim();
+      doc.setFontSize(13);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(...green);
+      const headingLines = doc.splitTextToSize(headingText, contentW);
+      headingLines.forEach((hl) => {
+        doc.text(hl, marginL, y);
+        y += 5.5;
+      });
+      // Green underline
+      doc.setDrawColor(...green);
+      doc.setLineWidth(0.5);
+      doc.line(marginL, y - 2, marginL + contentW, y - 2);
+      y += 3;
+      i++;
+      continue;
     }
+
+    // H3 heading
     if (line.startsWith("### ")) {
-      html += `<h3>${escHtml(line.slice(4))}</h3>`;
-      i++; continue;
+      y += 2;
+      checkPageBreak(10);
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(...textDark);
+      doc.text(cleanMarkdown(line.slice(4).trim()), marginL, y);
+      y += 6;
+      i++;
+      continue;
     }
+
+    // Unordered list
     if (line.startsWith("- ")) {
-      html += "<ul>";
       while (i < lines.length && lines[i].startsWith("- ")) {
-        html += `<li>${inlineToHtml(lines[i].slice(2))}</li>`;
+        const itemText = lines[i].slice(2).trim();
+        checkPageBreak(8);
+        doc.setFontSize(9.5);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(...textDark);
+        doc.text("\u2022", marginL + 2, y);
+        const wrapped = doc.splitTextToSize(cleanMarkdown(itemText), contentW - 8);
+        wrapped.forEach((wl) => {
+          checkPageBreak(5);
+          doc.text(wl, marginL + 7, y);
+          y += 4.2;
+        });
+        y += 1;
         i++;
       }
-      html += "</ul>"; continue;
+      y += 1;
+      continue;
     }
+
+    // Ordered list
     const numMatch = line.match(/^(\d+)\.\s+(.*)$/);
     if (numMatch) {
-      html += "<ol>";
       while (i < lines.length) {
         const m = lines[i].match(/^(\d+)\.\s+(.*)$/);
         if (!m) break;
-        html += `<li>${inlineToHtml(m[2])}</li>`;
+        checkPageBreak(8);
+        doc.setFontSize(9.5);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(...green);
+        doc.text(m[1] + ".", marginL + 1, y);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(...textDark);
+        const wrapped = doc.splitTextToSize(cleanMarkdown(m[2]), contentW - 10);
+        wrapped.forEach((wl) => {
+          checkPageBreak(5);
+          doc.text(wl, marginL + 9, y);
+          y += 4.2;
+        });
+        y += 1.5;
         i++;
       }
-      html += "</ol>"; continue;
+      y += 1;
+      continue;
     }
-    if (line.trim() === "") { i++; continue; }
-    html += `<p>${inlineToHtml(line)}</p>`;
+
+    // Empty line
+    if (line.trim() === "") {
+      y += 2;
+      i++;
+      continue;
+    }
+
+    // Regular paragraph
+    renderWrappedText(line.trim(), 9.5, "normal", textDark);
     i++;
   }
-  return html;
+
+  // --- Footer on last page ---
+  y += 8;
+  checkPageBreak(20);
+  doc.setDrawColor(200, 200, 200);
+  doc.setLineWidth(0.3);
+  doc.line(marginL, y, marginL + contentW, y);
+  y += 6;
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(...textGray);
+  doc.text(`\u00A9 ${new Date().getFullYear()} The Innovative Lawyer \u2014 theinnovativelawyer.ai`, pageW / 2, y, { align: "center" });
+  y += 4;
+  doc.text("Dit rapport is automatisch gegenereerd op basis van uw antwoorden.", pageW / 2, y, { align: "center" });
+
+  // Return base64
+  const arrayBuf = doc.output("arraybuffer");
+  return Buffer.from(arrayBuf).toString("base64");
 }
 
-function escHtml(s) {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
-function inlineToHtml(text) {
-  let s = escHtml(text);
-  // Bold
-  s = s.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-  // Italic
-  s = s.replace(/\*(.+?)\*/g, "<em>$1</em>");
-  // Links
-  s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+// Strip markdown formatting for PDF plain text
+function cleanMarkdown(text) {
+  let s = text;
+  // Remove bold
+  s = s.replace(/\*\*(.+?)\*\*/g, "$1");
+  // Remove italic
+  s = s.replace(/\*(.+?)\*/g, "$1");
+  // Remove links, keep text
+  s = s.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
   return s;
 }
 
