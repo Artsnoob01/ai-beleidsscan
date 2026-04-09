@@ -70,6 +70,7 @@ const translations = {
     score_aiact_sub: "AI-verordening",
 
     // getLevel labels
+    level_excellent: "Zeer goed",
     level_good: "Goed",
     level_fair: "Matig",
     level_poor: "Onvoldoende",
@@ -145,6 +146,7 @@ const translations = {
     score_aiact_sub: "AI regulation",
 
     // getLevel labels
+    level_excellent: "Excellent",
     level_good: "Good",
     level_fair: "Fair",
     level_poor: "Insufficient",

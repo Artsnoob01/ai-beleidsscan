@@ -51,7 +51,8 @@ export function calcScores(answers, sections) {
 }
 
 export function getLevel(s, lang = 'nl') {
-  if (s >= 75) return { label: t(lang, 'level_good'), color: C.success, bg: C.successDim, border: C.successBorder };
-  if (s >= 45) return { label: t(lang, 'level_fair'), color: C.warning, bg: C.warningDim, border: C.warningBorder };
+  if (s >= 85) return { label: t(lang, 'level_excellent'), color: C.success, bg: C.successDim, border: C.successBorder };
+  if (s >= 70) return { label: t(lang, 'level_good'), color: C.success, bg: C.successDim, border: C.successBorder };
+  if (s >= 50) return { label: t(lang, 'level_fair'), color: C.warning, bg: C.warningDim, border: C.warningBorder };
   return { label: t(lang, 'level_poor'), color: C.danger, bg: C.dangerDim, border: C.dangerBorder };
 }
