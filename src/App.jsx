@@ -11,13 +11,15 @@ import { EmailScreen } from './components/screens/EmailScreen.jsx';
 import { GeneratingScreen } from './components/screens/GeneratingScreen.jsx';
 import { ErrorScreen } from './components/screens/ErrorScreen.jsx';
 import { ReportScreen } from './components/screens/ReportScreen.jsx';
+import { OrderScreen } from './components/screens/OrderScreen.jsx';
+import { OrderConfirmScreen } from './components/screens/OrderConfirmScreen.jsx';
 
 // ═══════════════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════════════
 
 const initialState = {
-  phase: "intro",     // intro | quiz | email | gen | report | error
+  phase: "intro",     // intro | quiz | email | gen | report | error | order | order_confirm
   sectionIndex: 0,
   answers: {},
   scores: null,
@@ -29,6 +31,10 @@ const initialState = {
   emailSending: false,
   emailError: null,
   submissionId: null,
+  orderSubmitting: false,
+  orderError: null,
+  orderVariant: null,
+  orderEmail: null,
 };
 
 function reducer(state, action) {
@@ -70,6 +76,14 @@ function reducer(state, action) {
       return { ...state, emailSending: false, emailSent: false, emailError: action.error };
     case "SET_SUBMISSION_ID":
       return { ...state, submissionId: action.id };
+    case "SHOW_ORDER":
+      return { ...state, phase: "order" };
+    case "ORDER_SUBMITTING":
+      return { ...state, orderSubmitting: true, orderError: null };
+    case "ORDER_SUCCESS":
+      return { ...state, phase: "order_confirm", orderSubmitting: false, orderVariant: action.variant, orderEmail: action.email };
+    case "ORDER_ERROR":
+      return { ...state, orderSubmitting: false, orderError: action.error };
     case "RESTART":
       return { ...initialState };
     default:
@@ -98,7 +112,18 @@ function getInitialState() {
 export default function App() {
   const [state, dispatch] = useReducer(reducer, null, getInitialState);
   const ref = useRef(null);
-  const { phase, sectionIndex: si, answers: ans, scores, report, lang, error, email, emailSent, emailSending, emailError, submissionId } = state;
+  const { phase, sectionIndex: si, answers: ans, scores, report, lang, error, email, emailSent, emailSending, emailError, submissionId, orderSubmitting, orderError, orderVariant, orderEmail } = state;
+
+  // Check URL for order param: ?bestel=SUBMISSION_ID
+  const orderSubmissionId = useRef(null);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const bestelId = params.get("bestel");
+    if (bestelId) {
+      orderSubmissionId.current = bestelId;
+      dispatch({ type: "SHOW_ORDER" });
+    }
+  }, []);
   const sec = SECTIONS[si];
   const totalQ = SECTIONS.reduce((s, x) => s + x.questions.length, 0);
   const secDone = sec?.questions.every(q =>
@@ -204,7 +229,38 @@ export default function App() {
     generateAndSend(lang);
   }, [lang, generateAndSend]);
 
+  const handleOrderSubmit = useCallback(async (orderData) => {
+    dispatch({ type: "ORDER_SUBMITTING" });
+    try {
+      const resp = await fetch("/api/process-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData),
+      });
+      if (!resp.ok) {
+        const errData = await resp.json().catch(() => ({}));
+        throw new Error(errData.error || "Bestelling mislukt");
+      }
+      dispatch({ type: "ORDER_SUCCESS", variant: orderData.variant, email: orderData.email });
+    } catch (e) {
+      dispatch({ type: "ORDER_ERROR", error: e.message });
+    }
+  }, []);
+
   // ─── RENDER ───
+
+  if (phase === "order") return (
+    <OrderScreen
+      submissionId={orderSubmissionId.current || submissionId}
+      onSubmit={handleOrderSubmit}
+      submitting={orderSubmitting}
+      error={orderError}
+    />
+  );
+
+  if (phase === "order_confirm") return (
+    <OrderConfirmScreen variant={orderVariant} email={orderEmail} />
+  );
 
   if (phase === "intro") return (
     <>
