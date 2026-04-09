@@ -13,6 +13,7 @@ import { ErrorScreen } from './components/screens/ErrorScreen.jsx';
 import { ReportScreen } from './components/screens/ReportScreen.jsx';
 import { OrderScreen } from './components/screens/OrderScreen.jsx';
 import { OrderQuestionsScreen } from './components/screens/OrderQuestionsScreen.jsx';
+import { OrderThankYouScreen } from './components/screens/OrderThankYouScreen.jsx';
 import { OrderConfirmScreen } from './components/screens/OrderConfirmScreen.jsx';
 
 // ═══════════════════════════════════════════════════════════════
@@ -20,7 +21,7 @@ import { OrderConfirmScreen } from './components/screens/OrderConfirmScreen.jsx'
 // ═══════════════════════════════════════════════════════════════
 
 const initialState = {
-  phase: "intro",     // intro | quiz | email | gen | report | error | order | order_questions | order_confirm
+  phase: "intro",     // intro | quiz | email | gen | report | error | order | order_thankyou | order_questions | order_confirm
   sectionIndex: 0,
   answers: {},
   scores: null,
@@ -80,8 +81,10 @@ function reducer(state, action) {
       return { ...state, submissionId: action.id };
     case "SHOW_ORDER":
       return { ...state, phase: "order" };
+    case "ORDER_TO_THANKYOU":
+      return { ...state, phase: "order_thankyou", orderData: action.orderData, orderError: null };
     case "ORDER_TO_QUESTIONS":
-      return { ...state, phase: "order_questions", orderData: action.orderData, orderError: null };
+      return { ...state, phase: "order_questions" };
     case "ORDER_SUBMITTING":
       return { ...state, orderSubmitting: true, orderError: null };
     case "ORDER_SUCCESS":
@@ -234,7 +237,11 @@ export default function App() {
   }, [lang, generateAndSend]);
 
   const handleOrderNext = useCallback((orderData) => {
-    dispatch({ type: "ORDER_TO_QUESTIONS", orderData });
+    dispatch({ type: "ORDER_TO_THANKYOU", orderData });
+  }, []);
+
+  const handleOrderToContinue = useCallback(() => {
+    dispatch({ type: "ORDER_TO_QUESTIONS" });
   }, []);
 
   const handleOrderQuestionsSubmit = useCallback(async (policyDetails) => {
@@ -263,6 +270,14 @@ export default function App() {
       onSubmit={handleOrderNext}
       submitting={false}
       error={orderError}
+    />
+  );
+
+  if (phase === "order_thankyou") return (
+    <OrderThankYouScreen
+      variant={state.orderData?.variant}
+      email={state.orderData?.email}
+      onContinue={handleOrderToContinue}
     />
   );
 
